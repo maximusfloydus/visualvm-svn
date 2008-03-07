@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See harness/README in the NetBeans platform -->
+<!-- for some information on what you could do (e.g. targets to override). -->
+<!-- If you delete this file and reopen the project it will be recreated. -->
+<project name="visualvm" basedir=".">
+    <description>Builds the module suite visualvm.</description>
+    <import file="nbproject/build-impl.xml"/>
+
+    <target name="create-platform" depends="build-zip">
+        <mkdir dir="${visualvm-platform}"/>
+        <unzip src="dist/${app.name}.zip" dest="${visualvm-platform}"/>
+    </target>
+
+    <target name="-post-build-launchers">
+        <copy file="launcher/visualvm.exe" overwrite="true" todir="${build.launcher.dir}/bin/"/>
+        <copy file="launcher/visualvm_w.exe" overwrite="true" todir="${build.launcher.dir}/bin/"/>
+        <copy file="launcher/visualvm" overwrite="true" todir="${build.launcher.dir}/bin/"/>
+        <copy file="launcher/visualvm.conf" overwrite="true" todir="${build.launcher.dir}/etc/"/>
+    </target>
+    <target name="build-launchers" depends="suite.build-launchers,-post-build-launchers"/>
+    
+</project>
