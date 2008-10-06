@@ -89,11 +89,6 @@ public final class ExplorerSupport {
         selectDataSources(Collections.singleton(dataSource));
     }
     
-    /**
-     * Selects multiple DataSources in explorer tree.
-     * 
-     * @param dataSources DataSources to be selected.
-     */
     public void selectDataSources(final Set<DataSource> dataSources) {
         if (dataSources.isEmpty()) return;
         WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
@@ -117,11 +112,6 @@ public final class ExplorerSupport {
         });
     }
     
-    /**
-     * Returns selected DataSources in explorer tree.
-     * 
-     * @return selected DataSources in explorer tree.
-     */
     public Set<DataSource> getSelectedDataSources() {
         if (mainTree == null) return Collections.EMPTY_SET;
         
@@ -191,20 +181,10 @@ public final class ExplorerSupport {
         });
     }
     
-    /**
-     * Adds a listener to receive notifications about expanded/collapsed explorer tree nodes.
-     * 
-     * @param listener listener to add.
-     */
     public void addExpansionListener(ExplorerExpansionListener listener) {
         expansionListeners.add(listener);
     }
     
-    /**
-     * Removes explorer tree expansion listener.
-     * 
-     * @param listener listener to remove.
-     */
     public void removeExpansionListener(ExplorerExpansionListener listener) {
         expansionListeners.remove(listener);
     }

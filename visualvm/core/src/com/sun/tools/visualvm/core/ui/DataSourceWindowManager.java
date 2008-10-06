@@ -43,7 +43,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 
 /**
- * Class responsible for DataSourceViews manipulation.
+ * Class managing DataSourceWindows (TopComponents).
  *
  * @author Jiri Sedlacek
  */
@@ -79,11 +79,6 @@ public final class DataSourceWindowManager {
         return DataSourceViewsManager.sharedInstance().hasViewsFor(dataSource);
     }
     
-    /**
-     * Opens the DataSource.
-     * 
-     * @param dataSource DataSource to open.
-     */
     public void openDataSource(final DataSource dataSource) {
         processor.post(new Runnable() {
             public void run() {
@@ -92,11 +87,6 @@ public final class DataSourceWindowManager {
         });
     }
     
-    /**
-     * Closes the DataSource.
-     * 
-     * @param dataSource DataSource to close.
-     */
     public void closeDataSource(final DataSource dataSource) {
         processor.post(new Runnable() {
             public void run() {
@@ -130,11 +120,6 @@ public final class DataSourceWindowManager {
         });
     }
     
-    /**
-     * Opens the DataSource if needed and selects the DataSourceView.
-     * 
-     * @param view DataSourceView to select.
-     */
     public void selectView(final DataSourceView view) {
         processor.post(new Runnable() {
             public void run() {

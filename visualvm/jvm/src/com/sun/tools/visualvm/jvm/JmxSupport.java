@@ -26,7 +26,6 @@
 package com.sun.tools.visualvm.jvm;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
-import com.sun.management.OperatingSystemMXBean;
 import com.sun.tools.visualvm.application.Application;
 import com.sun.tools.visualvm.application.jvm.MonitoredData;
 import com.sun.tools.visualvm.core.datasupport.DataRemovedListener;
@@ -38,9 +37,7 @@ import com.sun.tools.visualvm.tools.jmx.JvmMXBeans;
 import com.sun.tools.visualvm.tools.jmx.JvmMXBeansFactory;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.LockInfo;
-import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryType;
 import java.lang.management.MonitorInfo;
@@ -77,13 +74,8 @@ public class JmxSupport implements DataRemovedListener {
     private boolean hotspotDiagnosticInitialized;
     private Object hotspotDiagnosticLock = new Object();
     private HotSpotDiagnosticMXBean hotspotDiagnosticMXBean;
-    // OperatingSystemMXBean
-    private boolean operatingSystemMXBeanInitialized;
-    private Object operatingSystemMXBeanLock = new Object();
-    private OperatingSystemMXBean operatingSystemMXBean;
     private Timer timer;
     private MemoryPoolMXBean permGenPool;
-    private Collection<GarbageCollectorMXBean> gcList;
 
     JmxSupport(Application app, JVMImpl vm) {
         jvm = vm;
@@ -99,26 +91,6 @@ public class JmxSupport implements DataRemovedListener {
         return null;
     }
 
-    OperatingSystemMXBean getOperationSystem() {
-        synchronized (operatingSystemMXBeanLock) {
-            if (operatingSystemMXBeanInitialized) {
-                return operatingSystemMXBean;
-            }
-            JvmMXBeans jmx = getJvmMXBeans();
-            if (jmx != null) {
-                ObjectName osName;
-                try {
-                    osName = new ObjectName(ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME);
-                } catch (Exception ex) {
-                    LOGGER.throwing(JmxSupport.class.getName(), "getOperationSystem", ex); // NOI18N
-                    return null;
-                }
-                operatingSystemMXBean = jmx.getMXBean(osName,OperatingSystemMXBean.class);
-            }
-            return operatingSystemMXBean;
-        }
-    }
-    
     synchronized JvmMXBeans getJvmMXBeans() {
         if (mxbeans == null) {
             JmxModel jmxModel = JmxModelFactory.getJmxModelFor(application);
@@ -129,16 +101,6 @@ public class JmxSupport implements DataRemovedListener {
         return mxbeans;
     }
 
-    synchronized Collection<GarbageCollectorMXBean> getGarbageCollectorMXBeans() {
-        if (gcList == null) {
-            JvmMXBeans jmx = getJvmMXBeans();
-            if (jmx != null) {
-                gcList = jmx.getGarbageCollectorMXBeans();
-            }           
-        }
-        return gcList;
-    }
-    
     Properties getSystemProperties() {
         try {
             RuntimeMXBean runtime = getRuntime();
@@ -337,5 +299,4 @@ public class JmxSupport implements DataRemovedListener {
     public void dataRemoved(Object dataSource) {
         disableTimer();
     }
-
 }

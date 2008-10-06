@@ -40,7 +40,6 @@ import java.io.File;
 import org.openide.util.Utilities;
 
 /**
- * Support for coredumps in VisualVM.
  *
  * @author Tomas Hurka
  */
@@ -62,30 +61,15 @@ public final class CoreDumpSupport {
     private static String currentJDKHome;
     
     
-    /**
-     * Returns PluggableDataSourceViewProvider for Overview coredump subtab.
-     * 
-     * @return PluggableDataSourceViewProvider for Overview coredump subtab.
-     */
     public static PluggableDataSourceViewProvider<CoreDump> getOverviewView() {
         return viewProvider;
     } 
     
-    /**
-     * Returns SnapshotCategory instance for coredumps.
-     * 
-     * @return SnapshotCategory instance for coredumps.
-     */
     public static SnapshotCategory getCategory() {
         return category;
     }
     
     // TODO: should be moved to some public Utils class
-    /**
-     * Returns JDK_HOME for JDK running the actual VisualVM instance.
-     * 
-     * @return JDK_HOME for JDK running the actual VisualVM instance.
-     */
     public static String getCurrentJDKHome() {
         synchronized(currentJDKHomeLock) {
             if (currentJDKHome == null) {
@@ -105,11 +89,6 @@ public final class CoreDumpSupport {
         }
     }
     
-    /**
-     * Returns storage directory for coredumps.
-     * 
-     * @return storage directory for coredumps.
-     */
     public static File getStorageDirectory() {
         synchronized(coredumpsStorageDirectoryLock) {
             if (coredumpsStorageDirectory == null) {
@@ -125,18 +104,13 @@ public final class CoreDumpSupport {
             return coredumpsStorageDirectory;
         }
     }
-
-    /**
-     * Returns true if the storage directory for coredumps already exists, false otherwise.
-     * 
-     * @return true if the storage directory for coredumps already exists, false otherwise.
-     */
+    
     public static boolean storageDirectoryExists() {
         return new File(getStorageDirectoryString()).isDirectory();
     }
 
     
-    static void register() {
+    public static void register() {
         if (Utilities.isWindows()) return;
         
         DataSourceDescriptorFactory.getDefault().registerProvider(new CoreDumpDescriptorProvider());

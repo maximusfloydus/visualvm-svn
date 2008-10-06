@@ -182,11 +182,7 @@ class XMBeanAttributes extends XTable {
     }
 
     @Override
-    public final boolean editCellAt(final int row, final int column, EventObject e) {
-        if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("editCellAt(row="+row+", col="+column+
-                    ", e="+e+")");
-        }
+    public final boolean editCellAt(int row, int column, EventObject e) {
         boolean retVal = super.editCellAt(row, column, e);
         if (retVal) {
             final TableCellEditor tableCellEditor =
@@ -264,7 +260,21 @@ class XMBeanAttributes extends XTable {
         }
     }
 
+    @Override
+    public Object getValueAt(int row, int column) {
+        if (isEditing() && column==VALUE_COLUMN &&
+                row == getEditingRow() && row != -1) {
+            final Object val = valueCellEditor.getCellEditorValue();
+            return val;
+        }
+        return super.getValueAt(row, column);
+    }
+
     public Object getValue(int row) {
+        if (row == getEditingRow() && row != -1) {
+            final Object val = valueCellEditor.getCellEditorValue();
+            return val;
+        }
         final Object val = ((DefaultTableModel) getModel())
                 .getValueAt(row, VALUE_COLUMN);
         return val;
@@ -587,34 +597,12 @@ class XMBeanAttributes extends XTable {
     // change
     //
     private void refreshAttributes(final boolean stopCellEditing) {
-         SwingWorker<Void,Void> sw = new SwingWorker<Void,Void>() {
-
-            @Override
-            protected Void doInBackground() throws Exception {
-                CachedMBeanServerConnection mbsc =
-                        mbeansTab.getCachedMBeanServerConnection();
-                mbsc.flush();
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    get();
-                    if (stopCellEditing) stopCellEditing();
-                    loadAttributes(mbean, mbeanInfo);
-                } catch (Exception x) {
-                    if (LOGGER.isLoggable(Level.FINER)) {
-                        LOGGER.log(Level.FINER,
-                        "Unexpected exception while loading attributes",// No I18N
-                                x);
-                    }
-                }
-            }
-         };
-         mbeansTab.getRequestProcessor().post(sw);
+         CachedMBeanServerConnection mbsc =
+                 mbeansTab.getCachedMBeanServerConnection();
+         mbsc.flush();
+         if (stopCellEditing) stopCellEditing();
+         loadAttributes(mbean, mbeanInfo);
      }
-
     // We need to call stop editing here - otherwise edits are lost
     // when resizing the table.
     //
@@ -623,16 +611,6 @@ class XMBeanAttributes extends XTable {
         if (isEditing()) stopCellEditing();
         super.columnMarginChanged(e);
     }
-
-    // We need to call stop editing here - otherwise the edited value
-    // is transferred to the wrong row...
-    //
-    @Override
-    void sortRequested(int column) {
-        if (isEditing()) stopCellEditing();
-        super.sortRequested(column);
-    }
-
 
     @Override
     public synchronized void emptyTable() {
@@ -831,8 +809,8 @@ class XMBeanAttributes extends XTable {
         MaximizedCellRenderer(Component comp) {
             this.comp = comp;
             Dimension d = comp.getPreferredSize();
-            if (d.getHeight() > 220) {
-                comp.setPreferredSize(new Dimension((int) d.getWidth(), 220));
+            if (d.getHeight() > 200) {
+                comp.setPreferredSize(new Dimension((int) d.getWidth(), 200));
             }
         }
         @Override
@@ -962,14 +940,6 @@ class XMBeanAttributes extends XTable {
                 final TableModel model = (TableModel)e.getSource();
                 Object tableValue = model.getValueAt(e.getFirstRow(),
                                                  e.getColumn());
-
-                if (LOGGER.isLoggable(Level.FINER)) {
-                    LOGGER.finer("tableChanged: firstRow="+e.getFirstRow()+
-                        ", lastRow="+e.getLastRow()+", column="+e.getColumn()+
-                        ", value="+tableValue);
-                }
-                // if it's a String, try construct new value
-                // using the defined type.
                 if (tableValue instanceof String) {
                     try {
                         tableValue =
@@ -1002,12 +972,6 @@ class XMBeanAttributes extends XTable {
                 }
                 @Override
                 protected void done() {
-                    try {
-                        get();
-                    } catch (Exception x) {
-                        // XX should not happen
-                        // XXX log this
-                    }
                     refreshAttributes(false);
                 }
 

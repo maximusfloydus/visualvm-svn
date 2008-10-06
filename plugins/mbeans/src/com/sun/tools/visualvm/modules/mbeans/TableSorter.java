@@ -42,59 +42,55 @@ class TableSorter extends DefaultTableModel implements MouseListener {
     private boolean ascending = true;
     private TableColumnModel columnModel;
     private JTable tableView;
-    private Vector<TableModelListener> evtListenerList;
+    private Vector<TableModelListener> listenerList;
     private int sortColumn = 0;
 
     private int[] invertedIndex;
 
     public TableSorter() {
         super();
-        evtListenerList = new Vector<TableModelListener>();
+        listenerList = new Vector<TableModelListener>();
     }
 
     public TableSorter(Object[] columnNames, int numRows) {
         super(columnNames,numRows);
-        evtListenerList = new Vector<TableModelListener>();
+        listenerList = new Vector<TableModelListener>();
     }
 
     @Override
     public void newDataAvailable(TableModelEvent e) {
         super.newDataAvailable(e);
         invertedIndex = new int[getRowCount()];
-        for (int i = 0; i < invertedIndex.length; i++) {
+        for (int i=0;i<invertedIndex.length;i++) {
             invertedIndex[i] = i;
         }
-        sort(this.sortColumn, this.ascending);
+        sort(this.sortColumn);
     }
 
     @Override
     public void addTableModelListener(TableModelListener l) {
-        evtListenerList.add(l);
+        listenerList.add(l);
         super.addTableModelListener(l);
     }
 
     @Override
     public void removeTableModelListener(TableModelListener l) {
-        evtListenerList.remove(l);
+        listenerList.remove(l);
         super.removeTableModelListener(l);
     }
 
     private void removeListeners() {
-        for(TableModelListener tnl : evtListenerList)
+        for(TableModelListener tnl : listenerList)
             super.removeTableModelListener(tnl);
     }
 
     private void restoreListeners() {
-        for(TableModelListener tnl : evtListenerList)
+        for(TableModelListener tnl : listenerList)
             super.addTableModelListener(tnl);
     }
 
     @SuppressWarnings("unchecked")
-    private int compare(Object o1, Object o2) {
-        // take care of the case where both o1 & o2 are null. Needed to keep
-        // the method symetric. Without this quickSort gives surprising results.
-        if (o1 == o2)
-            return 0;
+    public int compare(Object o1, Object o2) {
         if (o1==null)
             return 1;
         if (o2==null)
@@ -109,35 +105,18 @@ class TableSorter extends DefaultTableModel implements MouseListener {
         }
     }
 
-    private void sort(int column, boolean isAscending) {
-        final XMBeanAttributes attrs =
-                (tableView instanceof XMBeanAttributes)
-                ?(XMBeanAttributes) tableView
-                :null;
-
-        // We cannot sort rows when a cell is being
-        // edited - so we're going to cancel cell editing here if needed.
-        // This might happen when the user is editing a row, and clicks on
-        // another row without validating. In that case there are two events
-        // that compete: one is the validation of the value that was previously
-        // edited, the other is the mouse click that opens the new editor.
-        //
-        // When we reach here the previous value is already validated, and the
-        // old editor is closed, but the new editor might have opened.
-        // It's this new editor that wil be cancelled here, if needed.
-        //
-        if (attrs != null && attrs.isEditing())
-            attrs.cancelCellEditing();
-
+    public void sort(int column) {
         // remove registered listeners
         removeListeners();
         // do the sort
-        quickSort(0,getRowCount()-1,column,isAscending);
+        //n2sort(column);
+        quickSort(0,getRowCount()-1,column);
         // restore registered listeners
         restoreListeners();
-
+        this.sortColumn = column;
         // update row heights in XMBeanAttributes (required by expandable cells)
-        if (attrs != null) {
+        if (tableView instanceof XMBeanAttributes) {
+            XMBeanAttributes attrs = (XMBeanAttributes) tableView;
             for (int i = 0; i < getRowCount(); i++) {
                 Vector data = (Vector) dataVector.elementAt(i);
                 attrs.updateRowHeight(data.elementAt(1), i);
@@ -145,21 +124,21 @@ class TableSorter extends DefaultTableModel implements MouseListener {
         }
     }
 
-    private boolean compareS(Object s1, Object s2, boolean isAscending) {
-        if (isAscending)
+    private synchronized boolean compareS(Object s1, Object s2) {
+        if (ascending)
             return (compare(s1,s2) > 0);
         else
             return (compare(s1,s2) < 0);
     }
 
-    private boolean compareG(Object s1, Object s2, boolean isAscending) {
-        if (isAscending)
+    private synchronized boolean compareG(Object s1, Object s2) {
+        if (ascending)
             return (compare(s1,s2) < 0);
         else
             return (compare(s1,s2) > 0);
     }
 
-    private void quickSort(int lo0,int hi0, int key, boolean isAscending) {
+    private synchronized void quickSort(int lo0,int hi0, int key) {
         int lo = lo0;
         int hi = hi0;
         Object mid;
@@ -175,14 +154,14 @@ class TableSorter extends DefaultTableModel implements MouseListener {
                          * from the left Index.
                          */
                         while( ( lo < hi0 ) &&
-                               ( compareS(mid,getValueAt(lo,key), isAscending) ))
+                               ( compareS(mid,getValueAt(lo,key)) ))
                             ++lo;
 
                         /* find an element that is smaller than or equal to
                          * the partition element starting from the right Index.
                          */
                         while( ( hi > lo0 ) &&
-                               ( compareG(mid,getValueAt(hi,key), isAscending) ))
+                               ( compareG(mid,getValueAt(hi,key)) ))
                             --hi;
 
                         // if the indexes have not crossed, swap
@@ -199,15 +178,25 @@ class TableSorter extends DefaultTableModel implements MouseListener {
                                  * must now sort the left partition.
                                  */
                 if( lo0 < hi )
-                    quickSort(lo0, hi , key, isAscending);
+                    quickSort(lo0, hi , key);
 
                                 /* If the left index has not reached the right
                                  * side of array
                                  * must now sort the right partition.
                                  */
                 if( lo <= hi0 )
-                    quickSort(lo, hi0 , key, isAscending);
+                    quickSort(lo, hi0 , key);
             }
+    }
+
+    public void n2sort(int column) {
+        for (int i = 0; i < getRowCount(); i++) {
+            for (int j = i+1; j < getRowCount(); j++) {
+                if (compare(getValueAt(i,column),getValueAt(j,column)) == -1) {
+                    swap(i, j, column);
+                }
+            }
+        }
     }
 
     private Vector getRow(int row) {
@@ -219,7 +208,7 @@ class TableSorter extends DefaultTableModel implements MouseListener {
         dataVector.setElementAt(data,row);
     }
 
-    private void swap(int i, int j, int column) {
+    public void swap(int i, int j, int column) {
         Vector data = getRow(i);
         setRow(getRow(j),i);
         setRow(data,j);
@@ -235,12 +224,11 @@ class TableSorter extends DefaultTableModel implements MouseListener {
 
     public void sortByColumn(int column, boolean ascending) {
         this.ascending = ascending;
-        this.sortColumn = column;
-        sort(column,ascending);
+        sort(column);
     }
 
-    public int getIndexOfRow(int row) {
-        return invertedIndex[row];
+    public int[] getInvertedIndex() {
+        return invertedIndex;
     }
 
     // Add a mouse listener to the Table to trigger a table sort
@@ -256,14 +244,6 @@ class TableSorter extends DefaultTableModel implements MouseListener {
         int viewColumn = columnModel.getColumnIndexAtX(e.getX());
         int column = tableView.convertColumnIndexToModel(viewColumn);
         if (e.getClickCount() == 1 && column != -1) {
-            if (tableView instanceof XTable) {
-                XTable attrs = (XTable) tableView;
-                // inform the table view that the rows are going to be sorted
-                // against the values in a given column. This gives the
-                // chance to the table view to close its editor - if needed.
-                //
-                attrs.sortRequested(column);
-            }
             tableView.invalidate();
             sortByColumn(column);
             tableView.validate();

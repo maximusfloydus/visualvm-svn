@@ -33,14 +33,13 @@ import org.openide.util.NbBundle;
 
 /**
  * Abstract implementation of ThreadDump.
- * Each threaddump is defined by a threaddump file.
  *
  * @author Jiri Sedlacek
  */
 public abstract class ThreadDump extends Snapshot {
     
     /**
-     * Creates new instance of ThreadDump with the data stored in a file.
+     * Creates new instance of AbstractThreadDump with the data stored in a file.
      * 
      * @param file file where thread dump is saved.
      */
@@ -49,7 +48,7 @@ public abstract class ThreadDump extends Snapshot {
     }
     
     /**
-     * Creates new instance of ThreadDump with the data stored in a file and defined master.
+     * Creates new instance of AbstractThreadDump with the data stored in a file and defined master.
      * 
      * @param file file where thread dump is saved,
      * @param master DataSource in whose window the thread dump will be displayed.

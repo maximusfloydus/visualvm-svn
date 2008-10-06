@@ -35,7 +35,7 @@ import javax.swing.table.*;
 @SuppressWarnings("serial")
 class XTextFieldEditor extends XTextField implements TableCellEditor {
 
-    protected EventListenerList evtListenerList = new EventListenerList();
+    protected EventListenerList listenerList = new EventListenerList();
     protected ChangeEvent changeEvent = new ChangeEvent(this);
 
     private FocusListener editorFocusListener = new FocusAdapter() {
@@ -69,16 +69,16 @@ class XTextFieldEditor extends XTextField implements TableCellEditor {
     //TableCellEditor implementation
 
     public void addCellEditorListener(CellEditorListener listener) {
-        evtListenerList.add(CellEditorListener.class,listener);
+        listenerList.add(CellEditorListener.class,listener);
     }
 
     public void removeCellEditorListener(CellEditorListener listener) {
-        evtListenerList.remove(CellEditorListener.class, listener);
+        listenerList.remove(CellEditorListener.class, listener);
     }
 
     protected void fireEditingStopped() {
         CellEditorListener listener;
-        Object[] listeners = evtListenerList.getListenerList();
+        Object[] listeners = listenerList.getListenerList();
         for (int i=0;i< listeners.length;i++) {
             if (listeners[i] == CellEditorListener.class) {
                 listener = (CellEditorListener) listeners[i+1];
@@ -89,7 +89,7 @@ class XTextFieldEditor extends XTextField implements TableCellEditor {
 
     protected void fireEditingCanceled() {
         CellEditorListener listener;
-        Object[] listeners = evtListenerList.getListenerList();
+        Object[] listeners = listenerList.getListenerList();
         for (int i=0;i< listeners.length;i++) {
             if (listeners[i] == CellEditorListener.class) {
                 listener = (CellEditorListener) listeners[i+1];

@@ -36,7 +36,6 @@ import java.io.File;
 import java.net.InetAddress;
 
 /**
- * Support for hosts in VisualVM.
  *
  * @author Jiri Sedlacek
  */
@@ -56,50 +55,26 @@ public final class HostsSupport {
     private final HostProvider hostProvider = new HostProvider();
 
 
-    /**
-     * Returns singleton instance of HostsSupport.
-     * 
-     * @return singleton instance of HostsSupport.
-     */
     public static synchronized HostsSupport getInstance() {
         if (instance == null) instance = new HostsSupport();
         return instance;
     }
     
 
-    /**
-     * Creates new host from provided hostname.
-     * 
-     * @param hostname hostname of the host to be created.
-     * @return new host from provided hostname or null if the hostname could not be resolved.
-     */
     public Host createHost(String hostname) {
-        return hostProvider.createHost(new HostProperties(hostname, hostname), true);
+        return getHostProvider().createHost(new HostProperties(hostname, hostname), true);
     }
     
-    /**
-     * Creates new host from provided hostname and display name.
-     * 
-     * @param hostname hostname of the host to be created.
-     * @param displayname displayname of the host to be created.
-     * @return new host from provided hostname or null if the hostname could not be resolved.
-     */
-    public Host createHost(String hostname, String displayname) {
-        return hostProvider.createHost(new HostProperties(hostname, displayname), true);
-    }
-    
-    /**
-     * Returns already known Host instance with the same InetAddress or null.
-     * 
-     * @param inetAddress InetAddess to search.
-     * @return already known Host instance with the same InetAddress or null.
-     */
     public Host getHostByAddress(InetAddress inetAddress) {
-        return hostProvider.getHostByAddress(inetAddress);
+        return getHostProvider().getHostByAddress(inetAddress);
+    }
+
+    public HostProvider getHostProvider() {
+        return hostProvider;
     }
     
     
-    static String getStorageDirectoryString() {
+    public static String getStorageDirectoryString() {
         synchronized(hostsStorageDirectoryStringLock) {
             if (hostsStorageDirectoryString == null)
                 hostsStorageDirectoryString = Storage.getPersistentStorageDirectoryString() + File.separator + HOSTS_STORAGE_DIRNAME;
@@ -107,11 +82,6 @@ public final class HostsSupport {
         }
     }
     
-    /**
-     * Returns storage directory for defined hosts.
-     * 
-     * @return storage directory for defined hosts.
-     */
     public static File getStorageDirectory() {
         synchronized(hostsStorageDirectoryLock) {
             if (hostsStorageDirectory == null) {
@@ -128,11 +98,6 @@ public final class HostsSupport {
         }
     }
     
-    /**
-     * Returns true if the storage directory for defined hosts already exists, false otherwise.
-     * 
-     * @return true if the storage directory for defined hosts already exists, false otherwise.
-     */
     public static boolean storageDirectoryExists() {
         return new File(getStorageDirectoryString()).isDirectory();
     }

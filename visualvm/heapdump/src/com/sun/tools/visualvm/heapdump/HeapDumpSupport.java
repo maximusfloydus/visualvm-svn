@@ -39,7 +39,7 @@ import com.sun.tools.visualvm.core.ui.PluggableDataSourceViewProvider;
 import com.sun.tools.visualvm.coredump.CoreDump;
 
 /**
- * Support for heap dumps in VisualVM.
+ * A public entrypoint to the heap dump support in VisualVM.
  *
  * @author Jiri Sedlacek
  */
@@ -72,12 +72,6 @@ public final class HeapDumpSupport {
         return category;
     }
     
-    /**
-     * Returns true if taking heap dumps is supported for the application, false otherwise.
-     * 
-     * @param application application from which to take the heap dump.
-     * @return true if taking heap dumps is supported for the application, false otherwise.
-     */
     public boolean supportsHeapDump(Application application) {
         if (application.getState() != Stateful.STATE_AVAILABLE) return false;
         return JvmFactory.getJVMFor(application).isTakeHeapDumpSupported();
@@ -105,9 +99,9 @@ public final class HeapDumpSupport {
     
     
     /**
-     * Returns PluggableDataSourceViewProvider for heap dumps.
+     * Returns PluggableView instance to be used to customize the heap dump view.
      * 
-     * @return PluggableDataSourceViewProvider for heap dumps.
+     * @return PluggableView instance to be used to customize the heap dump view.
      */
     public PluggableDataSourceViewProvider<HeapDump> getHeapDumpView() {
         return heapDumpViewProvider;

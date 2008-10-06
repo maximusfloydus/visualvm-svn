@@ -34,7 +34,6 @@ import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 
 /**
- * Toplevel node Snapshots in Applications window.
  *
  * @author Jiri Sedlacek
  */
@@ -43,11 +42,6 @@ public final class SnapshotsContainer extends DataSource {
     private static SnapshotsContainer sharedInstance;
     
     
-    /**
-     * Returns singleton instance of SnapshotsContainer.
-     * 
-     * @return singleton instance of SnapshotsContainer.
-     */
     public static synchronized SnapshotsContainer sharedInstance() {
         if (sharedInstance == null) sharedInstance = new SnapshotsContainer();
         return sharedInstance;

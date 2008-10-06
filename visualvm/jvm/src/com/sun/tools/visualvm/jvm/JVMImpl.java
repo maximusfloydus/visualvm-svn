@@ -26,7 +26,6 @@
 package com.sun.tools.visualvm.jvm;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
-import com.sun.management.OperatingSystemMXBean;
 import com.sun.tools.visualvm.application.jvm.Jvm;
 import com.sun.tools.visualvm.application.jvm.MonitoredData;
 import com.sun.tools.visualvm.application.jvm.MonitoredDataListener;
@@ -47,7 +46,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -372,15 +370,6 @@ public class JVMImpl extends Jvm implements JvmstatListener {
         return dumpFile;
     }
     
-    public boolean isCpuMonitoringSupported() {
-        return jmxSupport.getOperationSystem() instanceof OperatingSystemMXBean;
-    }
-    
-    public boolean isCollectionTimeSupported() {
-        Collection gcList = jmxSupport.getGarbageCollectorMXBeans();
-        return gcList != null && !gcList.isEmpty();
-    }
-    
     protected AttachModel getAttach() {
         return AttachModelFactory.getAttachFor(application);
     }
@@ -439,7 +428,7 @@ public class JVMImpl extends Jvm implements JvmstatListener {
 
     public void dataChanged(JvmstatModel stat) {
         assert stat == monitoredVm;
-        MonitoredData data = new MonitoredDataImpl(this,jvmstatModel,jmxSupport);
+        MonitoredData data = new MonitoredDataImpl(this,jvmstatModel);
         notifyListeners(data);        
     }
 

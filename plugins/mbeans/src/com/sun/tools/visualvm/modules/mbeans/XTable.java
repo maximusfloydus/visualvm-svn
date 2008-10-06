@@ -38,9 +38,8 @@ abstract class XTable extends JTable {
 
     public XTable () {
         super();
-        @SuppressWarnings("serial")
-        final TableSorter sorter = new TableSorter();
-        setModel(sorter);
+        TableSorter sorter;
+        setModel(sorter = new TableSorter());
         sorter.addMouseListenerToHeaderInTable(this);
         setRowSelectionAllowed(false);
         setColumnSelectionAllowed(false);
@@ -56,14 +55,6 @@ abstract class XTable extends JTable {
     }
 
     /**
-     * Called by TableSorter if a mouse event requests to sort the rows.
-     * @param column the column against which the rows are sorted
-     */
-    void sortRequested(int column) {
-        // This is a hook for subclasses
-    }
-
-    /**
      * This returns the select index as the table was at initialization
      */
     public int getSelectedIndex() {
@@ -76,7 +67,7 @@ abstract class XTable extends JTable {
     public int convertRowToIndex(int row) {
         if (row == -1) return row;
         if (getModel() instanceof TableSorter) {
-            return ((TableSorter) getModel()).getIndexOfRow(row);
+            return (((TableSorter) getModel()).getInvertedIndex()[row]);
         } else {
             return row;
         }

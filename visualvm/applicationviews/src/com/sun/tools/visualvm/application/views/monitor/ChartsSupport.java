@@ -57,15 +57,23 @@ class ChartsSupport {
     private JPanel smallLegendPanel;
     
     public Chart() {
+      long time = System.currentTimeMillis();
+      
       setLayout(new BorderLayout());
       setOpaque(true);
       setBackground(Color.WHITE);
       
-      xyChartModel = createModel();
+      GlobalPreferences preferences = GlobalPreferences.sharedInstance();
+      xyChartModel = new BoundedDynamicXYChartModel(preferences.getMonitoredDataCache() * 60 / preferences.getMonitoredDataPoll()) {
+        public  long    getMaxDisplayYValue(int seriesIndex)      { return getMaxYValue(0); }
+      };
       setupModel(xyChartModel);
       
       xyChart = createChart();
-      setupChart(xyChart);
+      xyChart.setBackgroundPaint(getBackground());
+      xyChart.setModel(xyChartModel);
+      xyChart.setFitToWindow();
+      xyChart.setupInitialAppearance(time, time + 1200, 0, 2);
       add(xyChart, BorderLayout.CENTER);
       
       bigLegendPanel = createBigLegend();
@@ -74,22 +82,6 @@ class ChartsSupport {
       ToolTipManager.sharedInstance().registerComponent(xyChart);
       
 //      xyChartModel.addChartModelListener(this);
-    }
-    
-    protected BoundedDynamicXYChartModel createModel() {
-        GlobalPreferences preferences = GlobalPreferences.sharedInstance();
-        return new BoundedDynamicXYChartModel(preferences.getMonitoredDataCache() * 60 / preferences.getMonitoredDataPoll()) {
-            public  long    getMaxDisplayYValue(int seriesIndex)      { return getMaxYValue(0); }
-        };
-    }
-    
-    protected void setupChart(SynchronousXYChart xyChart) {
-        long time = System.currentTimeMillis();
-        
-        xyChart.setBackgroundPaint(getBackground());
-        xyChart.setModel(xyChartModel);
-        xyChart.setFitToWindow();
-        xyChart.setupInitialAppearance(time, time + 1200, 0, 2);
     }
     
     protected abstract SynchronousXYChart createChart();
@@ -198,59 +190,6 @@ class ChartsSupport {
     
   }
   
-  
-  public static class CpuMetricsChart extends Chart {
-      
-    protected BoundedDynamicXYChartModel createModel() {
-        GlobalPreferences preferences = GlobalPreferences.sharedInstance();
-        return new BoundedDynamicXYChartModel(preferences.getMonitoredDataCache() * 60 / preferences.getMonitoredDataPoll()) {
-            public  long    getMaxDisplayYValue(int seriesIndex)      { return 100; }
-        };
-    }
-    
-    protected void setupModel(BoundedDynamicXYChartModel xyChartModel) {
-      xyChartModel.setupModel(new String[] { NbBundle.getMessage(ChartsSupport.class, "LBL_Cpu_Usage"),   // NOI18N
-                                             NbBundle.getMessage(ChartsSupport.class, "LBL_Gc_Usage") },   // NOI18N
-                              new Color[]  { new Color(255, 127, 127), new Color(127, 63, 191) } );
-    }
-
-    protected SynchronousXYChart createChart() {
-      return new SynchronousXYChart(SynchronousXYChart.TYPE_LINE, SynchronousXYChart.VALUES_INTERPOLATED, 0.01);
-    }
-    
-    protected void setupChart(SynchronousXYChart xyChart) {
-        super.setupChart(xyChart);
-        long time = System.currentTimeMillis();
-        
-        xyChart.setVerticalAxisValueDivider(1);
-        xyChart.setupInitialAppearance(time, time + 1200, 0, 100);
-        xyChart.setVerticalAxisValueString("%"); // NOI18N
-        xyChart.setTopChartMargin(5);
-        xyChart.denySelection();
-        xyChart.setMinimumVerticalMarksDistance(UIManager.getFont("Panel.font").getSize() + 8); // NOI18N
-    }
-
-    protected JPanel createBigLegend() {
-      JLabel cpuUsage = new JLabel(getModel().getSeriesName(0), new ColorIcon(getModel().getSeriesColor(0), Color.BLACK, 18, 9), SwingConstants.LEADING);
-      cpuUsage.setOpaque(false);
-      cpuUsage.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-      JLabel gcUsage = new JLabel(getModel().getSeriesName(1), new ColorIcon(getModel().getSeriesColor(1), Color.BLACK, 18, 9), SwingConstants.LEADING);
-      gcUsage.setOpaque(false);
-      gcUsage.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-
-      JPanel legendPanel = new JPanel();
-      legendPanel.setOpaque(false);
-      legendPanel.add(cpuUsage);
-      legendPanel.add(gcUsage);
-      
-      return legendPanel;
-    }
-
-    protected JPanel createSmallLegend() {
-      return null;
-    }
-    
-  }
   
   public static class HeapMetricsChart extends Chart {
     

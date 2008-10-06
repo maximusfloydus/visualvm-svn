@@ -35,7 +35,7 @@ import java.util.Comparator;
 public final class ClassNameComparator implements Comparator {
     
     /**
-     * Shared instance of ClassNameComparator.
+     * Instance of ClassNameComparator.
      */
     public static final ClassNameComparator INSTANCE = new ClassNameComparator();
 

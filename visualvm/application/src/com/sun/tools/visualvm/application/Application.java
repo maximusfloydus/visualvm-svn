@@ -33,7 +33,6 @@ import java.io.File;
 
 /**
  * Abstract implementation of Application.
- * Each application is defined by a Host on which it's running and an unique identificator.
  *
  * @author Jiri Sedlacek
  */
@@ -56,10 +55,11 @@ public abstract class Application extends DataSource implements Stateful {
     
 
     /**
-     * Creates new instance of Application defined by a Host and unique identificator.
+     * Creates new instance of Abstract application identified by its id and/or process id running on a Host.
      * 
-     * @param host Host on which the application is running.
-     * @param id unique identificator of the application.
+     * @param host host of the application,
+     * @param id unique identificator of the application,
+     * @param pid process ide of the application or UNKNOWN_PID if the process id is unknown.
      */
     public Application(Host host, String id) {
         if (host == null) throw new IllegalArgumentException("Host cannot be null");    // NOI18N
@@ -69,38 +69,18 @@ public abstract class Application extends DataSource implements Stateful {
     }
 
 
-    /**
-     * Returns unique identificator of the application.
-     * 
-     * @return unique identificator of the application.
-     */
     public final String getId() {
         return id;
     }
 
-    /**
-     * Returns process id of the application or Application.UNKNOWN_PID.
-     * 
-     * @return process id of the application or Application.UNKNOWN_PID.
-     */
     public int getPid() {
         return UNKNOWN_PID;
     }
 
-    /**
-     * Returns Host on which the application is running.
-     * 
-     * @return Host on which the application is running.
-     */
     public final Host getHost() {
         return host;
     }
 
-    /**
-     * Returns true if the application is running on Host.LOCALHOST, false otherwise.
-     * 
-     * @return true if the application is running on Host.LOCALHOST, false otherwise.
-     */
     public final boolean isLocalApplication() {
         return Host.LOCALHOST.equals(getHost());
     }

@@ -32,7 +32,7 @@ class XPlotter extends Plotter {
     JTable table;
     public XPlotter(JTable table,
                     Plotter.Unit unit) {
-        super(unit,0,false);
+        super(unit);
         this.table = table;
     }
     @Override

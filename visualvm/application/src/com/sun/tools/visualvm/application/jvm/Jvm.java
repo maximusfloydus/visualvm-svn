@@ -190,24 +190,6 @@ public abstract class Jvm extends Model {
     public abstract boolean isMemoryMonitoringSupported();
 
     /**
-     * Tests if target JVM supports process CPU time monitoring. If true,
-     * methods getProcessCpuTime()
-     * from {@link MonitoredData} returns meaningfull data.
-     * @return <CODE>true</CODE> if JVM supports process CPU time monitoring,
-     * <CODE>false</CODE> otherwise
-     */
-    public abstract boolean isCpuMonitoringSupported();
-    
-    /**
-     * Tests if target JVM supports Garbage collection time monitoring. If true,
-     * methods getCollectionTime()
-     * from {@link MonitoredData} returns meaningfull data.
-     * @return <CODE>true</CODE> if JVM supports Garbage collection time monitoring,
-     * <CODE>false</CODE> otherwise
-     */
-    public abstract boolean isCollectionTimeSupported();
-
-    /**
      * Adds a {@link MonitoredDataListener} to the listener list.
      * @param l the MonitoredDataListener to be added
      */

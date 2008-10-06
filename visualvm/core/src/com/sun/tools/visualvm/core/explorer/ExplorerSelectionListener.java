@@ -29,16 +29,16 @@ import com.sun.tools.visualvm.core.datasource.DataSource;
 import java.util.Set;
 
 /**
- * Listener receiving notifications about explorer tree selection changes.
+ * Listener receiving notifications of explorer tree selection changes.
  *
  * @author Jiri Sedlacek
  */
 public interface ExplorerSelectionListener {
     
     /**
-     * Explorer tree selection changed.
+     * Notification that selection of explorer tree changed.
      * 
-     * @param selected selected DataSources or Collections.EMPTY_SET if no DataSource is selected.
+     * @param selected instance of selected DataSource or null if no DataSource is selected.
      */
     public void selectionChanged(Set<DataSource> selected);
 

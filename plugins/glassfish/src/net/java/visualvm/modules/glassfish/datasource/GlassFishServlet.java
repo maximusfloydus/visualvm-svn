@@ -40,7 +40,7 @@ public class GlassFishServlet extends GlassFishDataSource {
     private ServletMonitor monitor;
     private String name;
     
-    private final DataSourceDescriptor descriptor = new DataSourceDescriptor(this) {
+    private DataSourceDescriptor descriptor = new DataSourceDescriptor() {
 
         @Override
         public Image getIcon() {

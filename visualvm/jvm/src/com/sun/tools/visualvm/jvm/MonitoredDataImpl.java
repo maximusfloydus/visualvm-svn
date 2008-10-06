@@ -26,17 +26,14 @@
 package com.sun.tools.visualvm.jvm;
 
 
-import com.sun.management.OperatingSystemMXBean;
 import com.sun.tools.visualvm.application.jvm.Jvm;
 import com.sun.tools.visualvm.application.jvm.MonitoredData;
 import com.sun.tools.visualvm.tools.jmx.JvmMXBeans;
 import com.sun.tools.visualvm.tools.jvmstat.JvmJvmstatModel;
 import java.lang.management.ClassLoadingMXBean;
-import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
-import java.util.Collection;
 import sun.jvmstat.monitor.LongMonitor;
 
 /**
@@ -45,24 +42,22 @@ import sun.jvmstat.monitor.LongMonitor;
  */
 public class MonitoredDataImpl extends MonitoredData {
 
+  final private long loadedClasses;
+  final private long sharedLoadedClasses;
+  final private long sharedUnloadedClasses;
+  final private long unloadedClasses;
+  final private long threadsDaemon;
+  final private long threadsLive;
+  final private long threadsLivePeak;
+  final private long threadsStarted;
+  final private long applicationTime;
+  final private long upTime;
+  final private long[] genCapacity;
+  final private long[] genUsed;
+  final private long[] genMaxCapacity;
   final private Jvm jvm;
 
-  private MonitoredDataImpl(Jvm vm,JmxSupport jmxSupport) {
-    OperatingSystemMXBean osMXBean = jmxSupport.getOperationSystem();
-    Collection<GarbageCollectorMXBean> gcList = jmxSupport.getGarbageCollectorMXBeans();
-    if (osMXBean != null) {
-        processCpuTime = osMXBean.getProcessCpuTime();
-    }
-    if (gcList != null && !gcList.isEmpty()) {
-        for (GarbageCollectorMXBean gcBean : gcList) {
-            collectionTime+=gcBean.getCollectionTime();
-        }
-    }
-    jvm = vm;
-  }
-  
-  MonitoredDataImpl(Jvm vm,JvmJvmstatModel jvmstatModel,JmxSupport jmxSupport) {
-    this(vm,jmxSupport);
+  MonitoredDataImpl(Jvm vm,JvmJvmstatModel jvmstatModel) {
     loadedClasses = jvmstatModel.getLoadedClasses();
     sharedLoadedClasses = jvmstatModel.getSharedLoadedClasses();
     sharedUnloadedClasses = jvmstatModel.getSharedUnloadedClasses();
@@ -76,15 +71,13 @@ public class MonitoredDataImpl extends MonitoredData {
     genCapacity = jvmstatModel.getGenCapacity();
     genUsed = jvmstatModel.getGenUsed();
     genMaxCapacity = jvmstatModel.getGenMaxCapacity();
+    jvm = vm;
   }
 
   MonitoredDataImpl(Jvm vm,JmxSupport jmxSupport,JvmMXBeans jmxModel) {
-    this(vm,jmxSupport);
-    RuntimeMXBean runtimeBean = jmxModel.getRuntimeMXBean();
-    upTime = runtimeBean.getUptime();
     ClassLoadingMXBean classBean = jmxModel.getClassLoadingMXBean();
     ThreadMXBean threadBean = jmxModel.getThreadMXBean();
-    OperatingSystemMXBean osMXBean = jmxSupport.getOperationSystem();
+    RuntimeMXBean runtimeBean = jmxModel.getRuntimeMXBean();
     MemoryUsage mem = jmxModel.getMemoryMXBean().getHeapMemoryUsage();
     MemoryUsage perm = jmxSupport.getPermGenPool().getUsage();
     unloadedClasses = classBean.getUnloadedClassCount();
@@ -96,6 +89,7 @@ public class MonitoredDataImpl extends MonitoredData {
     threadsLivePeak = threadBean.getPeakThreadCount();
     threadsStarted = threadBean.getTotalStartedThreadCount();
     applicationTime = 0;
+    upTime = runtimeBean.getUptime();
     genCapacity = new long[2];
     genUsed = new long[2];
     genMaxCapacity = new long[2];
@@ -105,6 +99,7 @@ public class MonitoredDataImpl extends MonitoredData {
     genCapacity[1] = perm.getCommitted();
     genUsed[1] = perm.getUsed();
     genMaxCapacity[1] = perm.getMax();
+    jvm = vm;
   }
   
   private long getLongValue(LongMonitor mon) {
@@ -114,8 +109,59 @@ public class MonitoredDataImpl extends MonitoredData {
     return 0;
   }
   
+  public long getLoadedClasses() {
+    return loadedClasses;
+  }
+
+  public long getSharedLoadedClasses() {
+    return sharedLoadedClasses;
+  }
+
+  public long getSharedUnloadedClasses() {
+    return sharedUnloadedClasses;
+  }
+
+  public long getUnloadedClasses() {
+    return unloadedClasses;
+  }
+
+  public long getThreadsDaemon() {
+    return threadsDaemon;
+  }
+
+  public long getThreadsLive() {
+    return threadsLive;
+  }
+
+  public long getThreadsLivePeak() {
+    return threadsLivePeak;
+  }
+
+  public long getThreadsStarted() {
+    return threadsStarted;
+  }
+
+  public long getApplicationTime() {
+    return applicationTime;
+  }
+
   public Jvm getJVM() {
     return jvm;
   }
 
+  public long getUpTime() {
+    return upTime;
+  }
+
+  public long[] getGenCapacity() {
+    return genCapacity;
+  }
+
+  public long[] getGenUsed() {
+    return genUsed;
+  }
+  
+  public long[] getGenMaxCapacity() {
+    return genMaxCapacity;
+  }
 }

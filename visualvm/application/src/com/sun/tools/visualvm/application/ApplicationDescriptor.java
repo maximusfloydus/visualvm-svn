@@ -30,7 +30,6 @@ import com.sun.tools.visualvm.application.type.ApplicationTypeFactory;
 import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptor;
 
 /**
- * DataSourceDescriptor for Application.
  *
  * @author Jiri Sedlacek
  */

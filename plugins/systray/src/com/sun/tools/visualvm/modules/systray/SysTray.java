@@ -41,6 +41,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import javax.swing.SwingUtilities;
@@ -151,11 +153,12 @@ class SysTray {
         TrayIcon icon = new TrayIcon(image, tooltip, trayPopup);
         icon.setImageAutoSize(true);
         
-        icon.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        icon.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(final MouseEvent e) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        if (trayPopup.isEnabled()) toggleWindowVisibility();
+                        if (trayPopup.isEnabled() && e.getClickCount() == 2)
+                            toggleWindowVisibility();
                     }
                 });
             }

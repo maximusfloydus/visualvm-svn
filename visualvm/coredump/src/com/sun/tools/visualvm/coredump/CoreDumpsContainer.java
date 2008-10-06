@@ -34,7 +34,6 @@ import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 
 /**
- * Toplevel node VM Coredumps in Applications window.
  *
  * @author Jiri Sedlacek
  */
@@ -43,11 +42,6 @@ public final class CoreDumpsContainer extends DataSource {
     private static CoreDumpsContainer sharedInstance;
     
     
-    /**
-     * Returns singleton instance of CoreDumpsContainer.
-     * 
-     * @return singleton instance of CoreDumpsContainer.
-     */
     public static synchronized CoreDumpsContainer sharedInstance() {
         if (sharedInstance == null) sharedInstance = new CoreDumpsContainer();
         return sharedInstance;

@@ -25,6 +25,7 @@
 
 package com.sun.tools.visualvm.core.snapshot;
 
+import com.sun.tools.visualvm.core.snapshot.Snapshot;
 import com.sun.tools.visualvm.core.datasupport.Positionable;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -36,7 +37,6 @@ import javax.swing.filechooser.FileFilter;
  * Category should return POSITION_NONE for getPreferredPosition() if it's not to be shown in UI.
  *
  * @author Jiri Sedlacek
- * @author Tomas Hurka
  */
 public abstract class SnapshotCategory<X extends Snapshot> implements Positionable {
     
@@ -60,7 +60,6 @@ public abstract class SnapshotCategory<X extends Snapshot> implements Positionab
      * @param type type of snapshots described by this category,
      * @param prefix prefix of files containing the snapshots (can be null),
      * @param suffix suffix of files containing the snapshots (can be null).
-     * @param preferredPosition preferred position of this category within other categories when presented in UI.
      */
     public SnapshotCategory(String name, Class<X> type, String prefix, String suffix, int preferredPosition) {
         super();
@@ -98,23 +97,11 @@ public abstract class SnapshotCategory<X extends Snapshot> implements Positionab
         return preferredPosition;
     }
     
-    /**
-     * Returns true if the category can restore snapshot from a saved file, false otherwise.
-     * 
-     * @return true if the category can restore snapshot from a saved file, false otherwise.
-     */
+    
     public boolean supportsOpenSnapshot() {
         return false;
     }
     
-    /**
-     * Opens a saved snapshot.
-     * Default implementation does nothing, custom implementations should open
-     * an Open File dialog and open the choosen snapshot.
-     * Throws an UnsupportedOperationException if supportsOpenSnapshot() returns false.
-     * 
-     * @param file saved snapshot.
-     */
     public void openSnapshot(File file) {
         throw new UnsupportedOperationException("Open snapshot not supported"); // NOI18N
     }
@@ -139,16 +126,16 @@ public abstract class SnapshotCategory<X extends Snapshot> implements Positionab
     }
     
     protected boolean isSnapshot(File file) {
+        return isSnapshot(file.getName());
+    }
+    
+    protected boolean isSnapshot(String fileName) {
 //        String pref = getPrefix();
         String suff = getSuffix();
         // Fix for #92 - supported snapshot is detected just based on the SUFFIX by default
 //        if (pref != null && !fileName.startsWith(pref + PREFIX_DIVIDER)) return false;
-        if (suff != null && !file.getName().endsWith(suff)) return false;
+        if (suff != null && !fileName.endsWith(suff)) return false;
         return true;
-    }
-    
-    protected boolean isSnapshot(String fileName) {
-        return isSnapshot(new File(fileName));
     }
     
     protected String getBaseFileName(String fileName) {
@@ -184,28 +171,19 @@ public abstract class SnapshotCategory<X extends Snapshot> implements Positionab
         return fileName;
     }
     
-    /**
-     * Returns a FilenameFilter for the category.
-     * 
-     * @return FilenameFilter for the category.
-     */
     public FilenameFilter getFilenameFilter() {
         return new FilenameFilter() {
             public boolean accept(File dir, String name) {
-                return isSnapshot(new File(dir,name));
+                return isSnapshot(name);
             }
         };
     }
     
-    /**
-     * Returns a FileFilter for the category.
-     * 
-     * @return FileFilter for the category.
-     */
     public FileFilter getFileFilter() {
         return new FileFilter() {
             public boolean accept(File f) {
-                return f.isDirectory() || isSnapshot(f);
+                String suff = getSuffix();
+                return f.isDirectory() || (suff != null ? f.getName().endsWith(suff) : true);
             }
             public String getDescription() {
                 String suff = getSuffix();
