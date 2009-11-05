@@ -50,13 +50,6 @@ class ExplorerNodeRenderer extends DefaultTreeCellRenderer {
                 dtcr.setBackgroundSelectionColor(null);
                 dtcr.setBorderSelectionColor(null);
             }
-        } else if (UIUtils.isAquaLookAndFeel()) {
-            if (!sel) {
-                rl.setOpaque(true);
-                rl.setBackground(tree.getBackground());
-            } else {
-                rl.setOpaque(false);
-            }
         }
 
         return renderer;
