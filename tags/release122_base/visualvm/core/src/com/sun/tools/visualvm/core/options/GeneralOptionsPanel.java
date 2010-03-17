@@ -1,0 +1,435 @@
+/*
+ * Copyright 2007-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Sun designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Sun in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
+ * CA 95054 USA or visit www.sun.com if you need additional information or
+ * have any questions.
+ */
+
+package com.sun.tools.visualvm.core.options;
+
+import com.sun.tools.visualvm.core.ui.components.SectionSeparator;
+import com.sun.tools.visualvm.core.datasupport.Utils;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import org.netbeans.lib.profiler.global.Platform;
+import org.netbeans.lib.profiler.ui.components.JExtendedSpinner;
+import org.netbeans.modules.profiler.ProfilerIDESettings;
+import org.openide.awt.Mnemonics;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
+
+/**
+ *
+ * @author Jaroslav Bachorik
+ * @author Jiri Sedlacek
+ */
+final class GeneralOptionsPanel extends JPanel {
+
+    final private static Logger LOGGER = Logger.getLogger("com.sun.tools.visualvm.core.options");   // NOI18N
+    private final GeneralOptionsPanelController controller;
+
+    transient private final ChangeListener changeListener = new ChangeListener() {
+        public void stateChanged(ChangeEvent e) {
+            controller.changed();
+        }
+    };
+    
+    GeneralOptionsPanel(GeneralOptionsPanelController controller) {
+        this.controller = controller;
+        initComponents();
+        startTrackingChanges();
+    }
+
+
+    private void initComponents() {
+        GridBagConstraints c;
+
+        setLayout(new GridBagLayout());
+
+        // --- Polling ---
+
+        SectionSeparator pollingSection = UISupport.createSectionSeparator(NbBundle.getMessage
+                                          (GeneralOptionsPanel.class, "LBL_Polling")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridy = 0;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(0, 0, 5, 0);
+        add(pollingSection, c);
+
+        monitoredHostPLabel = new JLabel();
+        Mnemonics.setLocalizedText(monitoredHostPLabel, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_Monitored_Host")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 15, 3, 0);
+        add(monitoredHostPLabel, c);
+
+        monitoredHostPSpinner = new JExtendedSpinner();
+        monitoredHostPLabel.setLabelFor(monitoredHostPSpinner);
+        monitoredHostPSpinner.setModel(new SpinnerNumberModel(3, 1, 99999, 1));
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 40, 3, 4);
+        add(monitoredHostPSpinner, c);
+
+        monitoredHostPUnits = new JLabel();
+        Mnemonics.setLocalizedText(monitoredHostPUnits, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_Sec")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 2;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 0, 3, 0);
+        add(monitoredHostPUnits, c);
+        
+        threadsPLabel = new JLabel();
+        Mnemonics.setLocalizedText(threadsPLabel, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_Threads")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 15, 3, 0);
+        add(threadsPLabel, c);
+
+        threadsPSpinner = new JExtendedSpinner();
+        threadsPLabel.setLabelFor(threadsPSpinner);
+        threadsPSpinner.setModel(new SpinnerNumberModel(1, 1, 99999, 1));
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 40, 3, 4);
+        add(threadsPSpinner, c);
+
+        threadsPUnits = new JLabel();
+        Mnemonics.setLocalizedText(threadsPUnits, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_Sec")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 2;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 0, 3, 0);
+        add(threadsPUnits, c);
+
+        monitoredDataPLabel = new JLabel();
+        Mnemonics.setLocalizedText(monitoredDataPLabel, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_Monitored_Data")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 3;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 15, 3, 0);
+        add(monitoredDataPLabel, c);
+
+        monitoredDataPSpinner = new JExtendedSpinner();
+        monitoredDataPLabel.setLabelFor(monitoredDataPSpinner);
+        monitoredDataPSpinner.setModel(new SpinnerNumberModel(1, 1, 99999, 1));
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 3;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 40, 3, 4);
+        add(monitoredDataPSpinner, c);
+
+        monitoredDataPUnits = new JLabel();
+        Mnemonics.setLocalizedText(monitoredDataPUnits, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_Sec")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 2;
+        c.gridy = 3;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 0, 3, 0);
+        add(monitoredDataPUnits, c);
+
+        // --- Charts cache ---
+
+        SectionSeparator chartsCacheSection = UISupport.createSectionSeparator(NbBundle.getMessage
+                                          (GeneralOptionsPanel.class, "LBL_Charts_Cache")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridy = 4;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(15, 0, 5, 0);
+        add(chartsCacheSection, c);
+
+        monitoredHostCLabel = new JLabel();
+        Mnemonics.setLocalizedText(monitoredHostCLabel, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_Monitored_Host2")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 5;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 15, 3, 0);
+        add(monitoredHostCLabel, c);
+
+        monitoredHostCSpinner = new JExtendedSpinner();
+        monitoredHostCLabel.setLabelFor(monitoredHostCSpinner);
+        monitoredHostCSpinner.setModel(new SpinnerNumberModel(60, 1, 99999, 1));
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 5;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 40, 3, 4);
+        add(monitoredHostCSpinner, c);
+
+        monitoredHostCUnits = new JLabel();
+        Mnemonics.setLocalizedText(monitoredHostCUnits, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_min")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 2;
+        c.gridy = 5;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 0, 3, 0);
+        add(monitoredHostCUnits, c);
+
+        monitoredDataCLabel = new JLabel();
+        Mnemonics.setLocalizedText(monitoredDataCLabel, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_Monitored_Data2")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 6;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 15, 3, 0);
+        add(monitoredDataCLabel, c);
+
+        monitoredDataCSpinner = new JExtendedSpinner();
+        monitoredDataCLabel.setLabelFor(monitoredDataCSpinner);
+        monitoredDataCSpinner.setModel(new SpinnerNumberModel(60, 1, 99999, 1));
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 6;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 40, 3, 4);
+        add(monitoredDataCSpinner, c);
+
+        monitoredDataCUnits = new JLabel();
+        Mnemonics.setLocalizedText(monitoredDataCUnits, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_min")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridx = 2;
+        c.gridy = 6;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(3, 0, 3, 0);
+        add(monitoredDataCUnits, c);
+
+        // --- Profiler ---
+
+        SectionSeparator profilerSection = UISupport.createSectionSeparator(NbBundle.getMessage
+                                          (GeneralOptionsPanel.class, "LBL_Profiler")); // NOI18N
+        c = new GridBagConstraints();
+        c.gridy = 7;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(15, 0, 5, 0);
+        add(profilerSection, c);
+
+        JPanel resetDNSAPanel = new JPanel(new BorderLayout());
+
+        resetDNSALabel = new JLabel();
+        Mnemonics.setLocalizedText(resetDNSALabel, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "MSG_Do_Not_Show_Again")); // NOI18N
+        resetDNSAPanel.add(resetDNSALabel, BorderLayout.CENTER);
+
+        resetDNSAButton = new JButton();
+        Mnemonics.setLocalizedText(resetDNSAButton, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "BTN_Reset")); // NOI18N
+        resetDNSAPanel.add(resetDNSAButton, BorderLayout.EAST);
+
+        c = new GridBagConstraints();
+        c.gridy = 8;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(2, 15, 2, 0);
+        add(resetDNSAPanel, c);
+
+        JPanel resetCalibrationPanel = new JPanel(new BorderLayout());
+
+        resetCalibrationLabel = new JLabel();
+        Mnemonics.setLocalizedText(resetCalibrationLabel, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "LBL_ResetData")); // NOI18N
+        resetCalibrationPanel.add(resetCalibrationLabel, BorderLayout.CENTER);
+
+        resetCalibrationButton = new JButton();
+        Mnemonics.setLocalizedText(resetCalibrationButton, NbBundle.getMessage(
+                                   GeneralOptionsPanel.class, "BTN_Reset2")); // NOI18N
+        resetCalibrationPanel.add(resetCalibrationButton, BorderLayout.EAST);
+
+        c = new GridBagConstraints();
+        c.gridy = 9;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(2, 15, 0, 0);
+        add(resetCalibrationPanel, c);
+
+        // --- Filler ---
+
+        JPanel fillerPanel = new JPanel(null);
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 10;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        add(fillerPanel, c);
+    }
+
+    private void resetDNSAButtonAction() {
+        ProfilerIDESettings.getInstance().clearDoNotShowAgainMap();
+        resetDNSAButton.setEnabled(false);
+    }
+
+    private void resetCalibrationButtonAction() {
+        resetCalibrationButton.setEnabled(false);
+        RequestProcessor.getDefault().post(new Runnable() {
+            public void run() {
+                try {
+                    File calibrationDirectory = new File(Platform.getProfilerUserDir());
+                    if (calibrationDirectory.isDirectory()) {
+                        File[] calibrationFiles = calibrationDirectory.listFiles();
+                        for (File calibrationFile : calibrationFiles) {
+                            if (calibrationFile.isFile() && calibrationFile.getName().startsWith("machinedata.")) // NOI18N
+                                Utils.delete(calibrationFile, false);
+
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error resetting calibration data", e);  // NOI18N
+                }
+            }
+        });
+    }
+
+    void load() {
+        // TODO read settings and initialize GUI
+        // Example:        
+        // someCheckBox.setSelected(Preferences.userNodeForPackage(CorePanel.class).getBoolean("someFlag", false));
+        // or for org.openide.util with API spec. version >= 7.4:
+        // someCheckBox.setSelected(NbPreferences.forModule(CorePanel.class).getBoolean("someFlag", false));
+        // or:
+        // someTextField.setText(SomeSystemOption.getDefault().getSomeStringProperty());
+        GlobalPreferences preferences = GlobalPreferences.sharedInstance();
+        resetDNSAButton.setEnabled(true);
+        resetCalibrationButton.setEnabled(true);
+        monitoredHostPSpinner.setValue(preferences.getMonitoredHostPoll());
+        monitoredDataPSpinner.setValue(preferences.getMonitoredDataPoll());
+        threadsPSpinner.setValue(preferences.getThreadsPoll());
+        monitoredHostCSpinner.setValue(preferences.getMonitoredHostCache());
+        monitoredDataCSpinner.setValue(preferences.getMonitoredDataCache());
+    }
+
+    void store() {
+        // TODO store modified settings
+        // Example:
+        // Preferences.userNodeForPackage(CorePanel.class).putBoolean("someFlag", someCheckBox.isSelected());
+        // or for org.openide.util with API spec. version >= 7.4:
+        // NbPreferences.forModule(CorePanel.class).putBoolean("someFlag", someCheckBox.isSelected());
+        // or:
+        // SomeSystemOption.getDefault().setSomeStringProperty(someTextField.getText());
+        GlobalPreferences preferences = GlobalPreferences.sharedInstance();
+        preferences.setMonitoredHostPoll((Integer) monitoredHostPSpinner.getValue());
+        preferences.setMonitoredDataPoll((Integer) monitoredDataPSpinner.getValue());
+        preferences.setThreadsPoll((Integer) threadsPSpinner.getValue());
+        preferences.setMonitoredHostCache((Integer) monitoredHostCSpinner.getValue());
+        preferences.setMonitoredDataCache((Integer) monitoredDataCSpinner.getValue());
+        preferences.store();
+    }
+
+    boolean valid() {
+        try {
+            int mh = (Integer) monitoredHostPSpinner.getValue();
+            int md = (Integer) monitoredDataPSpinner.getValue();
+            int th = (Integer) threadsPSpinner.getValue();
+            int mhc = (Integer) monitoredHostCSpinner.getValue();
+            int mdc = (Integer) monitoredDataCSpinner.getValue();
+            return mh > 0 && md > 0 && th > 0 && mhc > 0 && mdc > 0;
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    private void startTrackingChanges() {
+        monitoredHostPSpinner.getModel().addChangeListener(changeListener);
+        threadsPSpinner.getModel().addChangeListener(changeListener);
+        monitoredDataPSpinner.getModel().addChangeListener(changeListener);
+        monitoredHostCSpinner.getModel().addChangeListener(changeListener);
+        monitoredDataCSpinner.getModel().addChangeListener(changeListener);
+
+        resetDNSAButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                resetDNSAButtonAction();
+            }
+        });
+        resetCalibrationButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                resetCalibrationButtonAction();
+            }
+        });
+    }
+
+
+    private JLabel monitoredHostPLabel;
+    private JSpinner monitoredHostPSpinner;
+    private JLabel monitoredHostPUnits;
+    private JLabel threadsPLabel;
+    private JSpinner threadsPSpinner;
+    private JLabel threadsPUnits;
+    private JLabel monitoredDataPLabel;
+    private JSpinner monitoredDataPSpinner;
+    private JLabel monitoredDataPUnits;
+    private JLabel monitoredHostCLabel;
+    private JSpinner monitoredHostCSpinner;
+    private JLabel monitoredHostCUnits;
+    private JLabel monitoredDataCLabel;
+    private JSpinner monitoredDataCSpinner;
+    private JLabel monitoredDataCUnits;
+    private JLabel resetDNSALabel;
+    private JButton resetDNSAButton;
+    private JLabel resetCalibrationLabel;
+    private JButton resetCalibrationButton;
+    
+}
