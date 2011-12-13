@@ -25,7 +25,6 @@
 
 package com.sun.tools.visualvm.threaddump.impl;
 
-import com.sun.tools.visualvm.core.datasource.DataSource;
 import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptor;
 import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptorFactory;
 import com.sun.tools.visualvm.threaddump.ThreadDump;
@@ -62,7 +61,7 @@ class ThreadDumpView extends DataSourceView {
     }
     
     private ThreadDumpView(ThreadDump threadDump, DataSourceDescriptor descriptor) {
-        super(threadDump, descriptor.getName(), descriptor.getIcon(), 0, isClosableView(threadDump));
+        super(threadDump, descriptor.getName(), descriptor.getIcon(), 0, true);
     }
         
     protected DataViewComponent createComponent() {
@@ -72,27 +71,6 @@ class ThreadDumpView extends DataSourceView {
                 new DataViewComponent.MasterViewConfiguration(true));
         
         return dvc;
-    }
-    
-    private static boolean isClosableView(ThreadDump threadDump) {
-        // ThreadDump invisible
-        if (!threadDump.isVisible()) return false;
-        
-        // ThreadDump not in DataSources tree
-        DataSource owner = threadDump.getOwner();
-        if (owner == null) return false;
-        
-        while (owner != null && owner != DataSource.ROOT) {
-            // Subtree containing ThreadDump invisible
-            if (!owner.isVisible()) return false;
-            owner = owner.getOwner();
-        }
-        
-        // ThreadDump visible in DataSources tree
-        if (owner == DataSource.ROOT) return true;
-        
-        // ThreadDump not in DataSources tree
-        return false;
     }
     
     
