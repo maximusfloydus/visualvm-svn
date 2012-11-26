@@ -28,7 +28,6 @@ package com.sun.tools.visualvm.core.snapshot;
 import com.sun.tools.visualvm.core.properties.PropertiesPanel;
 import com.sun.tools.visualvm.core.properties.PropertiesProvider;
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +62,6 @@ class GeneralPropertiesProvider extends PropertiesProvider<Snapshot> {
         JTextField f = new JTextField() {
             public void setUI(TextUI ui) { super.setUI(new BasicTextFieldUI()); }
         };
-        f.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
         f.setEditable(false);
         f.setOpaque(false);
         f.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
