@@ -32,7 +32,6 @@ import com.sun.tools.visualvm.profiling.presets.ProfilerCPUPanel;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.netbeans.lib.profiler.common.ProfilingSettings;
 import org.openide.util.NbBundle;
@@ -41,34 +40,24 @@ import org.openide.util.NbBundle;
  *
  * @author Jiri Sedlacek
  */
-public abstract class CPUSettingsSupport {
+abstract class CPUSettingsSupport {
     
     private JPanel container;
     private ProfilerCPUPanel panel;
     private PresetSelector selector;
     
     
-    DataViewComponent.DetailsView getDetailsView() {
+    public DataViewComponent.DetailsView getDetailsView() {
         return new DataViewComponent.DetailsView(NbBundle.getMessage(
                 CPUSettingsSupport.class, "LBL_Cpu_settings"), null, 10, // NOI18N
-                new ScrollableContainer(getComponent()), null);
-    }
-    
-    public JComponent getComponent() {
-        if (container == null) createPanel();
-        return container;
+                new ScrollableContainer(createPanel()), null);
     }
     
     
-    ProfilingSettings getSettings() { return panel.getSettings(); }
+    public ProfilingSettings getSettings() { return panel.getSettings(); }
     
-    void saveSettings() {
+    public void saveSettings() {
         // NOTE: might save custom configuration here
-    }
-    
-    void copySettings(CPUSettingsSupport settings) {
-        getComponent(); // initialize selector
-        selector.synchronizeWith(settings.selector);
     }
     
     public abstract boolean presetValid();

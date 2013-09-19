@@ -263,13 +263,5 @@ public final class ProfilerPreset {
     public String toString() {
         return getName();
     }
-    
-    public boolean equals(Object o) {
-        return o instanceof ProfilerPreset ? getName().equals(((ProfilerPreset)o).getName()) : false;
-    }
-    
-    public int hashCode() {
-        return getName().hashCode();
-    }
 
 }
